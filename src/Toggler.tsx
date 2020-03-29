@@ -3,14 +3,12 @@ import * as React from "react";
 import { useMachine } from "@xstate/react";
 import { toggleMachine, ToggleEvent } from "./toggleMachine";
 
-const Buttons = ({ send }: { send: (event: ToggleEvent["type"]) => void }) => {
-  return (
-    <>
-      <button onClick={() => send("TOGGLE")}>Send TOGGLE</button>
-      <button onClick={() => send("BANANA")}>Send BANANA</button>
-    </>
-  );
-};
+const Buttons = ({ send }: { send: (event: ToggleEvent["type"]) => void }) => (
+  <>
+    <button onClick={() => send("TOGGLE")}>Send TOGGLE</button>
+    <button onClick={() => send("BANANA")}>Send BANANA</button>
+  </>
+);
 
 export const Toggler: React.FC = () => {
   const [state, send] = useMachine(toggleMachine);

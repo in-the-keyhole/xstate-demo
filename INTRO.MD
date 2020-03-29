@@ -69,4 +69,78 @@ export const toggleMachine = createMachine<
 
 The first thing you may notice is that this is written using TypeScript. TypeScript is encouraged for use with state machines. There are some benefits when consuming the machine that come from type-narrowing in TypeScript, but that's a bit outside the scope of this article. For more, check out the great [documentation](https://xstate.js.org/docs/guides/typescript.html#using-typescript).
 
-We've also added a secondary action to our `inactive` state - an event we're calling `BANANA`.
+The second modification we've made is to our `inactive` state - an event we're calling `BANANA`. Because this event is declared within the `inactive` state, it will only trigger a transition when the application is in the `inactive` state. This is POWERFUL, folks. It means that there is no accidental transitioning unless the event itself is reachable.
+
+### States & Events
+
+In our `Toggler` component, we use an import from `@xstate/react` to consume our state machine config and give us access to the values or our state and a method to allow us to send events.
+
+```typescript
+const [state, send] = useMachine(toggleMachine);
+```
+
+We can use the `state` in our application as the following lines show:
+
+```
+  switch (state.value) {
+    case "active":
+      return (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center"
+          }}
+        >
+          State is ACTIVE!
+          <Buttons send={send} />
+        </div>
+      );
+
+    case "inactive":
+      return (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center"
+          }}
+        >
+          State is INACTIVE!
+          <Buttons send={send} />
+        </div>
+      );
+
+    default:
+      return null;
+  }
+```
+
+We can simply switch on the state value, and return the appropriate JSX. We'll show some text to let the user know what state we're in at the time.
+
+We can also use the `send` function like any other callback. In this case, we're going to pass it down to our `Buttons` component so we can click on the different buttons to send events to the state machine.
+
+The `Buttons` component looks like this:
+
+```jsx
+const Buttons = ({ send }: { send: (event: ToggleEvent["type"]) => void }) => (
+  <>
+    <button onClick={() => send("TOGGLE")}>Send TOGGLE</button>
+    <button onClick={() => send("BANANA")}>Send BANANA</button>
+  </>
+);
+```
+
+Note that we can click to send either event at any time. There is no built-in restriction to limit the firing of events. This is fine. However, whichever state we're in at the time determines whether the event will have an effect. As we discussed above, only certain events are valid at a given time based on the state. Try running the application and clicking on the buttons to fire the events. If we're in the `inactive` state, the `BANANA` event will result in a transition to the `active` state. If we're in the `active` state, the `BANANA` event will have no effect. You can change the name of the event or states in the machine, and see the changes ripple through the type definitions up to the application and affect what happens at any point in the machine.
+
+## Some Thoughts on State Management
+
+This has been a brief introduction to using state machines with the xstate library and an example React application. It by no means covers the depth of the library or state machine concepts in general. There's a lot there, and the [docs](https://xstate.js.org/docs/) already do a great job of providing examples and linking to reference documentation about state machine concepts and the underlying SCXML specification. If you want something to nerd out on over a weekend, there's plenty there for you.
+
+One thing that I hope is clear is that there is a simple but important distinction between state machines and a library such as `xstate` versus any other state management solution (such as Redux, or even `useState` or `useReducer` within React). The simple restrictions put on how states can be traversed with a state machine provide a "path" through the workflow of any given application, in a way that is not present with other methods. This allows for easier development, as it's simpler for you to work with as a developer and know "where you are" in an application. It also proves more digestible by tools (like the visualizer we looked at in the beginning of this post) - it is based on a serializable spec, after all.
+
+## Conclusion
+
+I hope you enjoyed this article - if you didn't, or would like to offer any constructive criticism, please get ahold of me in the comments section or ping me on Twitter [@mwarger](twitter.com/mwarger). I'm also happy to answer any questions. The xstate library is useful across any number of javascript-based environments, so if you need help integrating this into your own workflow, hit up Keyhole and we'll get you sorted out.
+
+I hope to follow this with a number of posts about different fun uses of state machines. If that sounds cool to you, let me know in the comments below. Thanks for reading.
