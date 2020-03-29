@@ -28,7 +28,7 @@ To get right down to it, I think the most important feature of state machines co
 
 Let's look at an example of this is a real (trivial) application, using our Toggle example from above.
 
-> The code referenced in this example is available [here](todo link)
+> The code referenced in this example is available [here](https://github.com/in-the-keyhole/xstate-demo)
 
 ### The Machine
 
